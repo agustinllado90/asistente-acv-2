@@ -1,6 +1,6 @@
 import streamlit as st
 
-# 1. CONFIGURACIÓN DE LA PÁGINA (Ajustada para pantallas pequeñas y grandes)
+# 1. CONFIGURACIÓN DE LA PÁGINA
 st.set_page_config(
     page_title="Asistente ACV", 
     page_icon="🧠", 
@@ -17,7 +17,7 @@ st.warning(
 
 st.write("---")
 
-# 3. PANEL INTERACTIVO DE IMÁGENES (Campos grandes para pantallas táctiles)
+# 3. PANEL INTERACTIVO DE IMÁGENES
 st.markdown("### 🎛️ Seleccione los hallazgos visuales:")
 
 dwi = st.selectbox(
@@ -40,42 +40,44 @@ gre = st.selectbox(
     ["Isointenso (Normal / Gris)", "Isointenso a levemente Hiperintenso (Gris claro)", "Hiperintenso (Blanco)", "Hipointenso (Mancha negra de artefacto)"]
 )
 
-# 4. LÓGICA DE DETECCIÓN ORIENTADA AL FLUJO DE TRABAJO
+# 4. LÓGICA DE DETECCIÓN CORREGIDA (CRITERIOS MÉDICOS REALES)
 st.write("---")
 
 if st.button("⚡ Evaluar e Identificar Estadio", type="primary", use_container_width=True):
     
-    # A. Freno de seguridad: Sospecha de Sangrado en GRE
+    # A. FRENO DE SEGURIDAD: Sospecha de Sangrado en GRE
     if "Mancha negra" in gre:
         st.error("### 🚨 ALERTA: COMPATIBLE CON HEMORRAGIA")
         st.write("**Visual:** Caída drástica de señal (mancha negra en GRE). Invalida protocolo de isquemia pura.")
         st.markdown("**🛑 ACCIÓN:** Avisar de inmediato al médico radiólogo de guardia antes de bajar al paciente.")
 
-    # B. Isquemia Hiperaguda (<6h) -> ¡Urgencia Médica!
+    # B. ISQUEMIA HIPERAGUDA (<6h) -> ¡Urgencia Médica!
     elif "Hiperintensa" in dwi and "Hipointensa" in adc and "Isointensa" in flair and "Normal" in gre:
         st.success("### ⚡ ISQUEMIA HIPERAGUDA (< 6 horas)")
-        st.write("**Visual:** Brilla en DWI, negro en ADC. **FLAIR normal** (infarto menor a 6 horas).")
+        st.write("**Visual:** Brilla en DWI, negro en ADC. **FLAIR normal** (infarto menor a 6 horas, edema citotóxico inicial).")
         st.markdown("**🔴 ACCIÓN:** Ventana terapéutica crítica. **Enviar urgente a la Guardia**.")
 
-    # C. Isquemia Aguda (6h a 3 días) -> ¡Urgencia Médica!
-    elif "Hiperintensa" in dwi and "Hipointensa" in adc and "Hiperintensa" in flair and "levemente Hiperintenso" in gre:
+    # C. ISQUEMIA AGUDA (6h a 3 días) -> ¡Urgencia Médica!
+    # CORRECCIÓN: Ahora GRE puede ser gris claro o blanco por el edema vasogénico establecido sin romper la app.
+    elif "Hiperintensa" in dwi and "Hipointensa" in adc and "Hiperintensa" in flair and ("levemente Hiperintenso" in gre or "Hiperintenso" in gre):
         st.success("### 🚨 ISQUEMIA AGUDA (6h a 3 días)")
-        st.write("**Visual:** Brilla en DWI, negro en ADC y **ya brilla en FLAIR**.")
+        st.write("**Visual:** Brilla en DWI, sigue negro (bajo) en ADC y **ya brilla notablemente en FLAIR**.")
         st.markdown("**🔴 ACCIÓN:** Requiere atención urgente en la guardia médica hospitalaria.")
 
-    # D. Isquemia Subaguda (7 a 21 días)
-    elif ("Hiperintensa" in dwi or "Isointensa" in dwi) and "Hiperintensa" in adc and "Hiperintensa" in flair and "Hiperintenso" in gre:
-        st.warning("### ⏳ ISQUEMIA SUBAGUDA (7 a 21 días)")
-        st.write("**Visual:** ADC y GRE brillan (células rotas, líquido libre). FLAIR brilla por cicatrización.")
-        st.markdown("**🟡 ACCIÓN:** Evolución intermedia. Derivar a consulta programada o revisión según clínica.")
+    # D. ISQUEMIA SUBAGUDA (3 a 21 días)
+    # CORRECCIÓN: Contempla la "Pseudonormalización" (ADC Isointenso) y la fase tardía (ADC Hiperintenso).
+    elif ("Hiperintensa" in dwi or "Isointensa" in dwi) and ("Isointensa" in adc or "Hiperintensa" in adc) and "Hiperintensa" in flair:
+        st.warning("### ⏳ ISQUEMIA SUBAGUDA (Fase de Evolución intermedia)")
+        st.write("**Visual:** El mapa de ADC se muestra **Isointenso (pseudonormalizado)** o **Hiperintenso (blanco)** debido a la lisis celular. FLAIR sigue brillando alto por gliosis/edema.")
+        st.markdown("**🟡 ACCIÓN:** Evolución intermedia. Derivar a consulta programada o revisión médica según clínica actual.")
 
-    # E. Isquemia Crónica (>21 días)
+    # E. ISQUEMIA CRÓNICA (>21 días)
     elif "Hipointensa" in dwi and "Hiperintensa" in adc and "Isointensa" in flair and "Normal" in gre:
         st.info("### 🏛️ ISQUEMIA CRÓNICA (>21 días)")
-        st.write("**Visual:** Negro en DWI, blanco en ADC. Tejido muerto reemplazado por líquido (cicatriz vieja).")
-        st.markdown("**🟢 ACCIÓN:** Hallazgo antiguo. **No requiere enviar a la guardia**. Trámite ambulatorio normal.")
+        st.write("**Visual:** Negro en DWI, blanco en ADC. Tejido muerto reemplazado por líquido cefalorraquídeo libre (encefalomalacia cavitada).")
+        st.markdown("**🟢 ACCIÓN:** Hallazgo antiguo (cicatriz vieja). **No requiere enviar a la guardia**. Trámite ambulatorio normal.")
 
-    # F. Combinaciones no lógicas o erróneas
+    # F. COMBINACIONES ATÍPICAS
     else:
-        st.error("### 🔍 Patrón Mixto / Error")
-        st.write("Las opciones no coinciden con la evolución típica. Verifica los tonos en la consola.")
+        st.error("### 🔍 Patrón Mixto / Combinación No Lógica")
+        st.write("Las opciones seleccionadas no coinciden con la evolución temporal clásica de un infarto. Por favor, reevalúe las intensidades de señal directamente en la consola de adquisición.")
