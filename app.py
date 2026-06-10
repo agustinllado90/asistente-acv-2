@@ -205,6 +205,9 @@ if st.button("⚡ Evaluar e Identificar Estadio", type="primary", use_container_
     adc_leve = "Levemente Hipointensa" in adc
     adc_hiper = "Hiperintensa" in adc
 
+    # ¿El patrón isquémico es crónico? (define cómo interpretar el GRE hipointenso)
+    es_cronica = "Hipointensa" in dwi and adc_hiper and "Hiperintensa" in flair
+
     # A.1 ISQUEMIA CRÓNICA (>21 días)
     if "Hipointensa" in dwi and adc_hiper and "Hiperintensa" in flair:
         st.info("### 🏛️ ISQUEMIA CRÓNICA (>21 días) — Hallazgo Antiguo")
@@ -284,25 +287,37 @@ if st.button("⚡ Evaluar e Identificar Estadio", type="primary", use_container_
         st.write("Los hallazgos seleccionados en DWI, ADC y FLAIR no se ajustan exactamente a los patrones clásicos automatizados de esta herramienta. Por favor, realice una correlación clínica completa y consulte al médico radiólogo de guardia.")
 
     # ===================================================================== #
-    # B) ALERTA DE SANGRADO — GRE opcional, evaluada por separado
+    # B) GRE OPCIONAL — interpretación SEGÚN CONTEXTO
     #    Si no se tildó nada, no interfiere en el diagnóstico isquémico.
+    #    En un patrón crónico, el GRE hipointenso es hemosiderina (sangre
+    #    vieja), NO un sangrado agudo: no corresponde la alerta de urgencia.
     # ===================================================================== #
     if "Hipointenso" in gre or "Mancha negra" in gre:
         st.write("---")
-        st.error("### 🚨 ALERTA ADICIONAL: GRE compatible con SANGRADO / COMPONENTE HEMORRÁGICO")
 
-        with st.expander("🖼️ Ver patrón de señal de referencia", expanded=True):
-            render_reference_images([
-                seq_card("DWI",   HIPER,    "Variable\n(según estadio)"),
-                seq_card("ADC",   HIPO,     "Variable\n(según estadio)"),
-                seq_card("FLAIR", HIPER,    "Variable"),
-                seq_card("GRE",   NEGRO_GRE,"⚠️ Mancha\nnegra (bloom)", note="hemorragia"),
-            ])
+        if es_cronica:
+            st.info("### 🩶 GRE hipointenso en contexto CRÓNICO — Hemosiderina (sangre vieja), NO sangrado agudo")
 
-        st.markdown("#### 🔬 ¿Por qué se ve de esta manera?")
-        st.write("* **GRE Hipointenso (Mancha negra drástica):** Delata la presencia de productos de degradación de la hemoglobina (susceptibilidad magnética). Puede tratarse de un sangrado, una transformación hemorrágica de un infarto o microsangrados crónicos.")
+            st.markdown("#### 🔬 ¿Por qué se ve de esta manera?")
+            st.write("* En una lesión **crónica**, la caída de señal o mancha negra en GRE/T2* **no es un sangrado actual**. Es un efecto de susceptibilidad magnética por depósitos de **hemosiderina** (sangre vieja atrapada en la cicatriz) o por el borde de la cavidad quística.")
 
-        st.markdown("**🛑 ACCIÓN DEL TÉCNICO:** Este hallazgo es independiente del estadio isquémico. **Avisar al médico radiólogo de guardia** antes de bajar al paciente de la camilla, ya que puede cambiar la conducta terapéutica.")
+            st.markdown("**🟢 ACCIÓN DEL TÉCNICO:** Es un hallazgo esperable en una secuela antigua. **No constituye una urgencia por sí mismo**; se correlaciona con el resto del estudio crónico.")
+
+        else:
+            st.error("### 🚨 ALERTA ADICIONAL: GRE compatible con SANGRADO / COMPONENTE HEMORRÁGICO")
+
+            with st.expander("🖼️ Ver patrón de señal de referencia", expanded=True):
+                render_reference_images([
+                    seq_card("DWI",   HIPER,    "Variable\n(según estadio)"),
+                    seq_card("ADC",   HIPO,     "Variable\n(según estadio)"),
+                    seq_card("FLAIR", HIPER,    "Variable"),
+                    seq_card("GRE",   NEGRO_GRE,"⚠️ Mancha\nnegra (bloom)", note="hemorragia"),
+                ])
+
+            st.markdown("#### 🔬 ¿Por qué se ve de esta manera?")
+            st.write("* **GRE Hipointenso (Mancha negra drástica):** Delata la presencia de productos de degradación de la hemoglobina (susceptibilidad magnética). En un infarto reciente avisa de un **sangrado o transformación hemorrágica activa**.")
+
+            st.markdown("**🛑 ACCIÓN DEL TÉCNICO:** **Avisar al médico radiólogo de guardia** antes de bajar al paciente de la camilla, ya que puede cambiar la conducta terapéutica.")
 
 # 6. SECCIÓN EDUCATIVA: TABLA RESUMEN SIEMPRE VISIBLE AL FINAL
 st.write("---")
