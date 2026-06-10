@@ -91,16 +91,15 @@ if st.button("⚡ Evaluar e Identificar Estadio", type="primary", use_container_
 
     # E. ISQUEMIA SUBAGUDA (3 a 21 días) — Fase de Transición
     elif "Hiperintensa" in dwi and "Levemente Hipointensa" in adc and "Hiperintensa" in flair and "Hiperintenso" in gre:
-        st.warning("### ⏳ ISQUEMIA SUBAGUDA (3 a 21 días) — Evolución Intermedia")
+        st.warning("### ⏳ ISQUEMIA SUBAGUDA (3 a 21 días) — Fase de Transición")
         
         st.markdown("#### 🔬 ¿Por qué se ve de esta manera?")
-        st.write("* **DWI Hiperintensa (Blanca):** Se mantiene la señal brillante en difusión debido a la persistencia del fenómeno celular o efectos intrínsecos de permeabilidad de las membranas que siguen alteradas.")
-        st.write("* **ADC Levemente Hipointensa (Gris oscura):** Refleja la transición del tejido. La restricción severa del agua empieza a ceder paulatinamente a medida que avanza la lisis celular (las células muertas se rompen y el líquido empieza a liberarse lentamente).")
-        st.write("* **FLAIR / GRE Francamente Hiperintensos (Blancos):** El edema vasogénico y la gliosis inflamatoria llegan a su punto máximo de volumen e intensidad, haciendo que ambas secuencias brillen intensamente en la zona afectada.")
+        st.write("* **DWI / ADC:** La restricción empieza a disminuir lentamente (efecto de desvanecimiento o 'fading'). El mapa de ADC ya no se ve tan negro.")
+        st.write("* **FLAIR:** Se mantiene brillante debido a la presencia constante de edema vasogénico y desintegración del tejido.")
+        st.write("* **GRE Hiperintenso:** Refleja los cambios metabólicos avanzados en la zona afectada.")
         
-        st.markdown("**🟡 ACCIÓN DEL TÉCNICO:** Es un cuadro en evolución intermedia. No es una urgencia de 'código rojo' de minutos, pero el paciente debe ser derivado a una consulta médica programada o revisión de guardia según su estado clínico actual.")
-
-    # F. COMBINACIONES ATÍPICAS
+        st.markdown("**🟡 ACCIÓN DEL TÉCNICO:** Es una lesión en evolución. Se debe coordinar con el médico radiólogo para evaluar si requiere priorización en el informe según el estado del paciente.")
+        
     else:
-        st.error("### 🔍 Patrón Mixto / Combinación No Lógica")
-        st.write("Las opciones seleccionadas no coinciden con la evolución temporal clásica de un infarto. Por favor, reevalúe detalladamente las intensidades de señal directamente en la consola de adquisición para descartar artefactos o errores de selección visual.")
+        st.info("### ℹ️ Combinación no específica")
+        st.write("Los hallazgos seleccionados no se ajustan exactamente a los patrones clásicos automatizados de esta herramienta. Por favor, realice una correlación clínica completa y consulte al médico radiólogo de guardia.")
