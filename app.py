@@ -119,6 +119,8 @@ def render_reference_images(stage_data):
         flex-wrap: wrap;
         gap: 12px;
         justify-content: center;
+        max-width: 290px;
+        margin: 0 auto;
       ">
         {cards_html}
       </div>
@@ -127,7 +129,11 @@ def render_reference_images(stage_data):
       </div>
     </div>
     """
-    components.html(full_html, height=230, scrolling=False)
+    # Altura dinámica: las tarjetas se acomodan en una grilla de 2 columnas,
+    # así que reservamos espacio según la cantidad de filas (2 tarjetas por fila).
+    filas = (len(stage_data) + 1) // 2
+    altura = 120 + filas * 175
+    components.html(full_html, height=altura, scrolling=False)
 
 
 # PALETA DE COLORES POR INTENSIDAD DE SEÑAL
